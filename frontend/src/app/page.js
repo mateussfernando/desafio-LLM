@@ -5,6 +5,9 @@ import axios from "axios";
 import MessageList from "../components/MessageList";
 import MessageInput from "../components/MessageInput";
 
+const API_ZENON_KEY_URL = process.env.NEXT_PUBLIC_API_ZENON_ORENDER;
+
+console.log("API_ZENON_KEY_URL:", API_ZENON_KEY_URL);
 export default function Home() {
   const [pergunta, setPergunta] = useState("");
   const [conversa, setConversa] = useState([
@@ -34,12 +37,9 @@ export default function Home() {
     setConversa([...conversa, novaPergunta]);
 
     try {
-      const resposta = await axios.post(
-        "http://localhost:3333/api/perguntar",
-        {
-          pergunta: pergunta,
-        }
-      );
+      const resposta = await axios.post(`${API_ZENON_KEY_URL}/api/perguntar`, {
+        pergunta: pergunta,
+      });
 
       const novaResposta = {
         tipo: "resposta",
