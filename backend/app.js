@@ -1,11 +1,10 @@
-// backend/app.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
-const port = 3333; // Porta diferente do seu outro serviço
+const port = 3333;
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
@@ -17,6 +16,7 @@ app.use(express.json());
 app.post("/api/perguntar", async (req, res) => {
   try {
     const { pergunta } = req.body;
+    const userApiKey = req.headers["x-api-key"] || OPENROUTER_API_KEY;
 
     if (!pergunta) {
       return res.status(400).json({ erro: "Pergunta é obrigatória" });
@@ -31,7 +31,7 @@ app.post("/api/perguntar", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: `Você é um professor sênior de tecnologia com 20 anos de experiência. 
+            content: `Você é Zênon um professor sênior de tecnologia com 20 anos de experiência. 
             Suas explicações são:
             - Clara e didática
             - Com exemplos práticos
@@ -40,7 +40,6 @@ app.post("/api/perguntar", async (req, res) => {
             - Técnica mas acessível
             Responda como se estivesse ensinando para alunos de graduação.`,
           },
-
           {
             role: "user",
             content: pergunta,
@@ -49,7 +48,7 @@ app.post("/api/perguntar", async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${userApiKey}`,
           "Content-Type": "application/json",
         },
       }
@@ -65,8 +64,44 @@ app.post("/api/perguntar", async (req, res) => {
     });
   } catch (error) {
     console.error("Erro:", error);
+
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        erro: "Chave de API inválida ou não fornecida",
+        detalhes: "Por favor, configure uma chave de API válida",
+      });
+    }
+
     res.status(500).json({
       erro: "Falha ao processar pergunta",
+      detalhes: error.message,
+    });
+  }
+});
+
+// Endpoint para configurar a chave de API do usuário
+app.post("/api/set-api-key", (req, res) => {
+  try {
+    const { apiKey } = req.body;
+
+    if (!apiKey) {
+      return res.status(400).json({ erro: "Chave de API é obrigatória" });
+    }
+
+    if (apiKey.length < 20) {
+      return res.status(400).json({ erro: "Chave de API inválida" });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: "Chave de API configurada com sucesso",
+      // Em produção, considere criptografar ou armazenar de forma segura
+      apiKey: apiKey,
+    });
+  } catch (error) {
+    console.error("Erro:", error);
+    res.status(500).json({
+      erro: "Falha ao processar chave de API",
       detalhes: error.message,
     });
   }
@@ -88,6 +123,7 @@ app.get("/", (req, res) => {
     <p>Endpoints disponíveis:</p>
     <ul>
       <li>POST /api/perguntar</li>
+      <li>POST /api/set-api-key</li>
       <li>GET /api/testar</li>
     </ul>
   `);

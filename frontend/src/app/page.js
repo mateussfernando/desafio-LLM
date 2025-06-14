@@ -1,103 +1,130 @@
-import Image from "next/image";
+"use client";
+import { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import ChatHeader from "../components/ChatHeader";
+import MessageList from "../components/MessageList";
+import MessageInput from "../components/MessageInput";
+import ApiKeyModal from "../components/ApiKeyModal";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [pergunta, setPergunta] = useState("");
+  const [conversa, setConversa] = useState([
+    {
+      tipo: "resposta",
+      texto:
+        "Eu sou Zênon, sua IA especialista em tecnologia e programação!\n\nPosso te ajudar com:\n• Dúvidas sobre linguagens de programação\n• Conceitos de algoritmos e estruturas de dados\n• Frameworks e ferramentas de desenvolvimento\n• Melhores práticas e padrões de código\n• Carreira em TI e aprendizagem contínua\n\nPor onde gostaria de começar?",
+    },
+  ]);
+  const [carregando, setCarregando] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const mensagensRef = useRef(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // Verifica se já temos uma chave salva no localStorage
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem("userApiKey");
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  async function enviarPergunta() {
+    if (!pergunta.trim()) return;
+
+    setCarregando(true);
+    const novaPergunta = { tipo: "pergunta", texto: pergunta };
+    setConversa([...conversa, novaPergunta]);
+
+    try {
+      // Se não tiver API key e não for a primeira mensagem, mostra o modal
+      if (!apiKey && conversa.length > 1) {
+        setShowApiKeyModal(true);
+        setCarregando(false);
+        return;
+      }
+
+      const resposta = await axios.post(
+        "http://localhost:3333/api/perguntar",
+        {
+          pergunta: pergunta,
+        },
+        {
+          headers: apiKey ? { "X-API-KEY": apiKey } : {},
+        }
+      );
+
+      const novaResposta = {
+        tipo: "resposta",
+        texto: resposta.data.resposta,
+      };
+
+      setConversa((prev) => [...prev, novaResposta]);
+    } catch (erro) {
+      console.error("Erro:", erro);
+
+      // Se o erro for de autenticação, pede a chave de API
+      if (erro.response?.status === 401) {
+        setShowApiKeyModal(true);
+        setConversa((prev) => [
+          ...prev,
+          {
+            tipo: "resposta",
+            texto:
+              "🔑 Parece que precisamos configurar sua chave de API para continuar. Por favor, insira sua chave no modal que apareceu.",
+          },
+        ]);
+      } else {
+        setConversa((prev) => [
+          ...prev,
+          {
+            tipo: "resposta",
+            texto: "❌ Ocorreu um erro ao processar sua pergunta.",
+          },
+        ]);
+      }
+    } finally {
+      setCarregando(false);
+      setPergunta("");
+    }
+  }
+
+  function handleKeyPress(e) {
+    if (e.key === "Enter" && !carregando) {
+      enviarPergunta();
+    }
+  }
+
+  const handleSaveApiKey = (key) => {
+    localStorage.setItem("userApiKey", key);
+    setApiKey(key);
+  };
+
+  return (
+    <div
+      className="min-h-screen flex flex-col bg-fixed bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('Base.jpg')" }}
+    >
+      <ChatHeader />
+
+      <MessageList
+        conversa={conversa}
+        carregando={carregando}
+        mensagensRef={mensagensRef}
+      />
+
+      <MessageInput
+        pergunta={pergunta}
+        setPergunta={setPergunta}
+        carregando={carregando}
+        enviarPergunta={enviarPergunta}
+        handleKeyPress={handleKeyPress}
+      />
+
+      <ApiKeyModal
+        show={showApiKeyModal}
+        onClose={() => setShowApiKeyModal(false)}
+        onSave={handleSaveApiKey}
+      />
     </div>
   );
 }
