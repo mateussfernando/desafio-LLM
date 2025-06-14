@@ -35,7 +35,7 @@ export default function Home() {
 
     try {
       const resposta = await axios.post(
-        "https://desafio-llm.onrender.com//api/perguntar",
+        "https://desafio-llm.onrender.com/api/perguntar",
         {
           pergunta: pergunta,
         }
