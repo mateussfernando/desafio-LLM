@@ -34,7 +34,7 @@ export default function Home() {
     setConversa([...conversa, novaPergunta]);
 
     try {
-      const resposta = await axios.post("http://localhost:3333/api/perguntar", {
+      const resposta = await axios.post("https://desafio-llm.onrender.com", {
         pergunta: pergunta,
       });
 
