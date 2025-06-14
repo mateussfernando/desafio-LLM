@@ -34,12 +34,9 @@ export default function Home() {
     setConversa([...conversa, novaPergunta]);
 
     try {
-      const resposta = await axios.post(
-        "https://testezenonai.onrender.com/api/perguntar",
-        {
-          pergunta: pergunta,
-        }
-      );
+      const resposta = await axios.post("http://localhost:3333", {
+        pergunta: pergunta,
+      });
 
       const novaResposta = {
         tipo: "resposta",
