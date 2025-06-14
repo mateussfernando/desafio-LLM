@@ -37,7 +37,7 @@ app.post("/api/perguntar", async (req, res) => {
             - Com analogias fáceis de entender
             - Com contexto de aplicação real
             - Técnica mas acessível
-            Responda como se estivesse ensinando para alunos de graduação.`,
+            Responda como se estivesse ensinando para um aluno de graduação.`,
           },
 
           {
