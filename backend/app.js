@@ -48,7 +48,7 @@ app.post("/api/perguntar", async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
@@ -93,7 +93,7 @@ app.get("/", (req, res) => {
 });
 
 
-
+console.log("Chave carregada:", process.env.OPENROUTER_API_KEY);
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
