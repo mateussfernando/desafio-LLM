@@ -7,7 +7,6 @@ const axios = require("axios");
 const app = express();
 const port = 3333; // Porta diferente do seu outro serviço
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // Middlewares
 app.use(cors());
