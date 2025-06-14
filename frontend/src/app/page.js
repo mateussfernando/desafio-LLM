@@ -34,9 +34,12 @@ export default function Home() {
     setConversa([...conversa, novaPergunta]);
 
     try {
-      const resposta = await axios.post("https://desafio-llm.onrender.com", {
-        pergunta: pergunta,
-      });
+      const resposta = await axios.post(
+        "https://desafio-llm.onrender.com//api/perguntar",
+        {
+          pergunta: pergunta,
+        }
+      );
 
       const novaResposta = {
         tipo: "resposta",
