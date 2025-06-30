@@ -34,9 +34,12 @@ export default function Home() {
     setConversa([...conversa, novaPergunta]);
 
     try {
-      const resposta = await axios.post("http://localhost:3333", {
-        pergunta: pergunta,
-      });
+      const resposta = await axios.post(
+        "http://localhost:3333/api/perguntar",
+        {
+          pergunta: pergunta,
+        }
+      );
 
       const novaResposta = {
         tipo: "resposta",
