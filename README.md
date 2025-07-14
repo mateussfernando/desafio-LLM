@@ -14,21 +14,23 @@ Chatbot especializado em tirar dúvidas sobre tecnologia e programação, desenv
 git clone [https://github.com/mateussfernando/desafio-LLM]
 ```
 
-2. Inicie o backend:
+2. crie um .env com sua chave api do open router
+
+3. Inicie o backend:
 ```bash
 cd backend
 npm install
 node app.js
 ```
 
-3. Inicie o frontend:
+4. Inicie o frontend:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-4. Acesse `http://localhost:3000` e comece a conversar com o Zênon!
+5. Acesse `http://localhost:3000` e comece a conversar com o Zênon!
 
 ## 💻 Tecnologias
 
